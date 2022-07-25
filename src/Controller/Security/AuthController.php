@@ -3,11 +3,14 @@
 namespace App\Controller\Security;
 
 use App\Entity\User;
+use App\Form\RegistrationType;
 use App\Repository\UserRepository;
+use App\Service\FormsErrorManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -28,23 +31,32 @@ class AuthController extends AbstractController
     }
 
     #[Route('api/registration', name: 'app_security_auth', methods: ['POST'])]
-    public function registration(Request $request): JsonResponse
+    public function registration(
+        Request $request,
+        FormsErrorManager $formsErrorManager,
+        UserPasswordHasherInterface $passwordHasher
+    ): JsonResponse
     {
-        $email = $request->get('email');
-        $password = $request->get('password');
-        $user = $this->userRepository->findOneBy(['email' => $email]);
-        if (!is_null($user)) {
-            return $this->json([
-                'message' => 'User already exist'
-            ], Response::HTTP_CONFLICT);
-        }
+        $data = json_decode($request->getContent(), true);
+        $user = new User();
+        $form = $this->createForm(RegistrationType::class, $user);
+        $form->submit($data);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user = $form->getData();
+            $password = $passwordHasher->hashPassword($user, $user->getPassword());
+            $user->setPassword($password);
+            $this->userRepository->upgradeApiToken($user, true);
 
-        $user = $this->userRepository->create(['email' => $email, 'password' => $password]);
-        return $this->json(
-            ['user' => $user],
-            Response::HTTP_CREATED,
-            context: [AbstractNormalizer::GROUPS => ['user.self']]
-        );
+            return $this->json(
+                ['user' => $user],
+                Response::HTTP_CREATED,
+                context: [AbstractNormalizer::GROUPS => ['user.self']]
+            );
+        }
+        return $this->json([
+            'message' => $formsErrorManager->getErrorsFromForm($form)
+        ], Response::HTTP_CONFLICT);
+
     }
 
 
