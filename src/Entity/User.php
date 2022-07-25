@@ -20,17 +20,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user.secret'])]
+    #[Groups(['ROLE_ADMIN'])]
     private int $id;
 
     #[Assert\NotBlank]
     #[Assert\Email]
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['user.show', 'user.secret', 'user.self'])]
+    #[Groups(['PUBLIC', 'ROLE_ADMIN', 'USER_SELF'])]
     private string $email;
 
     #[ORM\Column(type: "json")]
-    #[Groups(['user.show', 'user.secret', 'user.self'])]
+    #[Groups(['PUBLIC', 'ROLE_ADMIN', 'USER_SELF'])]
     private $roles = [];
 
     /**
@@ -38,12 +38,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[Assert\NotBlank]
     #[ORM\Column]
-    #[Groups(['user.secret'])]
+    #[Groups(['ROLE_ADMIN'])]
     private string $password;
 
 
     #[ORM\Column(length: 255, unique: true)]
-    #[Groups(['user.secret', 'user.self'])]
+    #[Groups(['ROLE_ADMIN', 'USER_SELF'])]
     private string $api_token;
 
     public function getId(): ?int

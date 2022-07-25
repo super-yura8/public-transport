@@ -37,7 +37,10 @@ class AuthController extends AbstractController
         UserPasswordHasherInterface $passwordHasher
     ): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data = [
+            'email' => $request->request->get('email'),
+            'password' => $request->request->get('password')
+        ];
         $user = new User();
         $form = $this->createForm(RegistrationType::class, $user);
         $form->submit($data);
@@ -50,7 +53,7 @@ class AuthController extends AbstractController
             return $this->json(
                 ['user' => $user],
                 Response::HTTP_CREATED,
-                context: [AbstractNormalizer::GROUPS => ['user.self']]
+                context: [AbstractNormalizer::GROUPS => ['USER_SELF']]
             );
         }
         return $this->json([
@@ -68,11 +71,12 @@ class AuthController extends AbstractController
                 'message' => 'missing credentials',
             ], Response::HTTP_UNAUTHORIZED);
         }
+
         $this->userRepository->upgradeApiToken($user, true);
         return $this->json(
             ['user' => $user],
             Response::HTTP_ACCEPTED,
-            context: [AbstractNormalizer::GROUPS => ['user.self']]
+            context: [AbstractNormalizer::GROUPS => ['USER_SELF', ...$user->getRoles()]]
         );
     }
 
