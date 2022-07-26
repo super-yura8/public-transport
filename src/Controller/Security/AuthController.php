@@ -16,7 +16,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
-
+#[Route('api', name: 'api_')]
 class AuthController extends AbstractController
 {
 
@@ -30,7 +30,7 @@ class AuthController extends AbstractController
         $this->serializer = $serializer;
     }
 
-    #[Route('api/registration', name: 'app_security_auth', methods: ['POST'])]
+    #[Route('/registration', name: 'registration', methods: ['POST'])]
     public function registration(
         Request $request,
         FormsErrorManager $formsErrorManager,
@@ -63,7 +63,7 @@ class AuthController extends AbstractController
     }
 
 
-    #[Route('/api/login', name: 'api_login')]
+    #[Route('/login', name: 'login', methods: ['POST'])]
     public function login(#[CurrentUser] ?User $user): JsonResponse
     {
         if (is_null($user)) {
