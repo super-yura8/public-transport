@@ -3,12 +3,12 @@
 namespace App\Security;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
@@ -30,10 +30,10 @@ class ApiLoginAuthenticator extends AbstractAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        $email = $request->request->get('email', '');
+        $data = new ArrayCollection(json_decode($request->getContent(), true));
         return new Passport(
-            new UserBadge($email),
-            new PasswordCredentials($request->request->get('password', '')),
+            new UserBadge($data->get('email')),
+            new PasswordCredentials($data->get('password')),
         );
     }
 

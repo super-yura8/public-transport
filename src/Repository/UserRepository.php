@@ -6,6 +6,7 @@ use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
@@ -20,6 +21,7 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  */
 class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
+
 
     private UserPasswordHasherInterface $passwordHasher;
 
@@ -61,6 +63,17 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->add($user);
     }
 
+    public function hashPassword(PasswordAuthenticatedUserInterface $user, string $newPassword, bool $flush = false)
+    {
+        if (!$user instanceof User) {
+            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', \get_class($user)));
+        }
+
+        $user->setPassword($this->passwordHasher->hashPassword($user, $newPassword));
+
+        $this->add($user, $flush);
+    }
+
     /**
      * Update or create the user's api token
      * @throws \Exception
@@ -74,21 +87,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $user->setApiToken(rtrim(strtr(base64_encode(random_bytes(64)), '+/', '-_'), '='));
 
         $this->add($user, $flush);
-    }
-
-    /**
-     * Create a user
-     * @throws \Exception
-     */
-    public function create(array$data): User
-    {
-        $user = new User();
-        $user->setEmail($data['email']);
-        $user->setPassword($this->passwordHasher->hashPassword($user, $data['password']));
-        $this->upgradeApiToken($user);
-
-        $this->add($user, true);
-        return $user;
     }
 
 //    /**

@@ -10,7 +10,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -34,20 +33,15 @@ class AuthController extends AbstractController
     public function registration(
         Request $request,
         FormsErrorManager $formsErrorManager,
-        UserPasswordHasherInterface $passwordHasher
     ): JsonResponse
     {
-        $data = [
-            'email' => $request->request->get('email'),
-            'password' => $request->request->get('password')
-        ];
+        $data = json_decode($request->getContent(), true);
         $user = new User();
         $form = $this->createForm(RegistrationType::class, $user);
         $form->submit($data);
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $form->getData();
-            $password = $passwordHasher->hashPassword($user, $user->getPassword());
-            $user->setPassword($password);
+            $this->userRepository->hashPassword($user, $user->getPassword());
             $this->userRepository->upgradeApiToken($user, true);
 
             return $this->json(
