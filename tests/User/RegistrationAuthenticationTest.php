@@ -2,126 +2,116 @@
 
 namespace App\Tests\User;
 
-use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\Entity\User;
 use Doctrine\ORM\EntityManager;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Liip\TestFixturesBundle\Services\DatabaseTools\AbstractDatabaseTool;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 
-class RegistrationAuthenticationTest extends ApiTestCase
+class RegistrationAuthenticationTest extends WebTestCase
 {
 
     use RefreshDatabaseTrait;
 
-    private const USER_REGISTER_EMAIL = "test-register-user@uf.com";
-    private const USER_LOGIN_EMAIL = "test-login-user@uf.com";
+    private const USER_EMAIL = "test-register-user@uf.com";
     private const USER_PASS = "testPass123";
 
-    private HttpClientInterface $client;
+    private KernelBrowser $client;
     private EntityManager $em;
+    private AbstractDatabaseTool $databaseTool;
 
     protected function setUp(): void
     {
-        $kernel = self::bootKernel();
-
+        $this->client = self::createClient();
+        $kernel = static::bootKernel();
         $this->em = $kernel->getContainer()
             ->get('doctrine')
             ->getManager();
-        $this->client = $this->createClient();
     }
 
     public function testRegistration(): void
     {
-        $this->client->request("POST", "/api/registration", [
-            "json" => [
-                "email" => self::USER_REGISTER_EMAIL,
+        $this->client->request("POST", "/api/registration", content: json_encode([
+                "email" => self::USER_EMAIL,
                 "password" => self::USER_PASS
             ]
-        ]);
-
+        ));
+        $response = $this->client->getResponse();
         $this->assertResponseIsSuccessful();
-        $this->assertJsonContains([
-            "user" => [
-                "email" => self::USER_REGISTER_EMAIL,
-            ]
-        ]);
+        $data = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('user', $data);
+        $this->assertArrayHasKey('email', $data['user']);
+        $this->assertSame(self::USER_EMAIL, $data['user']['email']);
+        $this->assertArrayHasKey('api_token', $data['user']);
     }
 
     public function testAuthentication()
     {
-        $userRepo = $this->em->getRepository(User::class);
-        $user = new User();
-        $user->setEmail(self::USER_LOGIN_EMAIL);
-        $userRepo->hashPassword($user, self::USER_PASS);
-        $userRepo->upgradeApiToken($user, true);
-
-        $this->client->request("POST", "/api/login", [
-            "json" => [
-                "email" => self::USER_LOGIN_EMAIL,
+        $this->client->request("POST", "/api/login", content: json_encode(
+            [
+                "email" => self::USER_EMAIL,
                 "password" => self::USER_PASS
-            ]
-        ]);
-        $user = $this->em->getRepository(User::class)->findOneBy(["email" => self::USER_LOGIN_EMAIL]);
-        $this->assertResponseIsSuccessful();
+            ]));
+        $response = $this->client->getResponse();
 
-        $this->assertJsonContains([
-            "user" => [
-                "email" => $user->getEmail(),
-            ]
-        ]);
+        $user = $this->em->getRepository(User::class)->findOneBy(["email" => self::USER_EMAIL]);
+
+        $this->assertResponseIsSuccessful();
+        $data = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('user', $data);
+        $this->assertArrayHasKey('email', $data['user']);
+        $this->assertSame($user->getEmail(), $data['user']['email']);
+        $this->assertArrayHasKey('api_token', $data['user']);
     }
 
     public function testApiTokenAuth()
     {
-
-        $user = $this->em->getRepository(User::class)->findOneBy(["email" => self::USER_LOGIN_EMAIL]);
-        $this->client->request("POST", "/api/users/current", [
-            "headers" => [
-                "x-api-token" => $user->getApiToken(),
-            ]
+        $user = $this->em->getRepository(User::class)->findOneBy(["email" => self::USER_EMAIL]);
+        $this->client->request("GET", "/api/users/current",[], [], [
+            "HTTP_x-api-token" => $user->getApiToken(),
         ]);
+        $response = $this->client->getResponse();
         $this->assertResponseIsSuccessful();
 
-        $this->assertJsonContains([
-            "user" => [
-                "email" => $user->getEmail(),
-                "roles" => $user->getRoles(),
-                "api_token" => $user->getApiToken(),
-            ]
-        ]);
+        $data = json_decode($response->getContent(), true);
+        $this->assertArrayHasKey('user', $data);
+        $this->assertArrayHasKey('email', $data['user']);
+        $this->assertSame($user->getEmail(), $data['user']['email']);
+        $this->assertArrayHasKey('api_token', $data['user']);
+        $this->assertSame($user->getApiToken(), $data['user']['api_token']);
+
     }
 
     public function testFailRegistration(): void
     {
-        $this->client->request("POST", "/api/registration", [
-            "json" => [
+        $this->client->request("POST", "/api/registration", content: json_encode(
+            [
                 "email" => '',
                 "password" => self::USER_PASS
             ]
-        ]);
+        ));
 
         $this->assertResponseStatusCodeSame(409);
     }
 
     public function testFailAuthentication()
     {
-        $this->client->request("POST", "/api/login", [
-            "json" => [
-                "email" => self::USER_LOGIN_EMAIL,
+        $this->client->request("POST", "/api/login", content: json_encode(
+            [
+                "email" => self::USER_EMAIL,
                 "password" => ''
             ]
-        ]);
+        ));
         $this->assertResponseStatusCodeSame(401);
 
     }
 
     public function testFailApiTokenAuth()
     {
-        $this->client->request("GET", "/api/users/current", [
-            "headers" => [
-                "x-api-token" => '',
-            ]
+        $this->client->request("GET", "/api/users/current",[], [], [
+            "HTTP_x-api-token" => '',
         ]);
         $this->assertResponseStatusCodeSame(401);
 
