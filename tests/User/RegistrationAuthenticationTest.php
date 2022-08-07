@@ -25,7 +25,7 @@ class RegistrationAuthenticationTest extends WebTestCase
     protected function setUp(): void
     {
         $this->client = self::createClient();
-        $kernel = static::bootKernel();
+        $kernel = self::bootKernel();
         $this->em = $kernel->getContainer()
             ->get('doctrine')
             ->getManager();
@@ -57,7 +57,6 @@ class RegistrationAuthenticationTest extends WebTestCase
         $response = $this->client->getResponse();
 
         $user = $this->em->getRepository(User::class)->findOneBy(["email" => self::USER_EMAIL]);
-
         $this->assertResponseIsSuccessful();
         $data = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('user', $data);

@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -33,6 +34,7 @@ class AuthController extends AbstractController
     public function registration(
         Request $request,
         FormsErrorManager $formsErrorManager,
+        UserPasswordHasherInterface $passwordHasher
     ): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -41,7 +43,8 @@ class AuthController extends AbstractController
         $form->submit($data);
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $form->getData();
-            $this->userRepository->hashPassword($user, $user->getPassword());
+            $password = $passwordHasher->hashPassword($user, $user->getPassword());
+            $user->setPassword($password);
             $this->userRepository->upgradeApiToken($user, true);
 
             return $this->json(

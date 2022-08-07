@@ -63,17 +63,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->add($user);
     }
 
-    public function hashPassword(PasswordAuthenticatedUserInterface $user, string $newPassword, bool $flush = false)
-    {
-        if (!$user instanceof User) {
-            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', \get_class($user)));
-        }
-
-        $user->setPassword($this->passwordHasher->hashPassword($user, $newPassword));
-
-        $this->add($user, $flush);
-    }
-
     /**
      * Update or create the user's api token
      * @throws \Exception
