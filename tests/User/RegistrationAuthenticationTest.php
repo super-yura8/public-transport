@@ -5,7 +5,6 @@ namespace App\Tests\User;
 use App\Entity\User;
 use Doctrine\ORM\EntityManager;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
-use Liip\TestFixturesBundle\Services\DatabaseTools\AbstractDatabaseTool;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
