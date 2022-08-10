@@ -6,32 +6,38 @@ use App\Repository\TransportRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Groups;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
 #[ORM\Entity(repositoryClass: TransportRepository::class)]
-#[UniqueEntity(fields: ["number"], message: "There is already a route with this number")]
+#[UniqueEntity(fields: ["number", "type"], message: "There is already a route with this number and type")]
 class Transport
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['TRANSPORT_PUBLIC'])]
     private int $id;
 
     #[Assert\NotBlank]
-    #[ORM\Column(length: 10, unique: true)]
-    private string $number;
+    #[ORM\Column(unique: true)]
+    #[Groups(['TRANSPORT_PUBLIC'])]
+    private int $number;
 
 
     #[ORM\Column]
+    #[Groups(['TRANSPORT_PUBLIC'])]
     private bool $active = true;
 
     #[ORM\ManyToOne(inversedBy: 'transports')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['TRANSPORT_PUBLIC'])]
     private TransportType $type;
 
     #[ORM\OneToMany(mappedBy: 'transport', targetEntity: TransportRun::class, orphanRemoval: true)]
+    #[Groups(['TRANSPORT_PUBLIC'])]
     private Collection $transportRuns;
 
     public function __construct()

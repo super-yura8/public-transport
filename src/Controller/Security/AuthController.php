@@ -6,13 +6,14 @@ use App\Entity\User;
 use App\Form\RegistrationType;
 use App\Repository\UserRepository;
 use App\Service\FormsErrorManager;
+use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializerBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('api', name: 'api_')]
@@ -21,12 +22,9 @@ class AuthController extends AbstractController
 
     private UserRepository $userRepository;
 
-    private SerializerInterface $serializer;
-
     public function __construct(UserRepository $userRepository, SerializerInterface $serializer)
     {
         $this->userRepository = $userRepository;
-        $this->serializer = $serializer;
     }
 
     #[Route('/registration', name: 'registration', methods: ['POST'])]
@@ -43,12 +41,14 @@ class AuthController extends AbstractController
             $user = $form->getData();
             $this->userRepository->hashPassword($user, $user->getPassword());
             $this->userRepository->upgradeApiToken($user, true);
+            $serializer = SerializerBuilder::create()->build();
 
-            return $this->json(
-                ['user' => $user],
-                Response::HTTP_CREATED,
-                context: [AbstractNormalizer::GROUPS => ['USER_SELF']]
-            );
+            $user = $serializer
+                ->toArray(
+                    $user,
+                    context: SerializationContext::create()->setGroups(['USER_SELF', ...$user->getRoles()])
+                );
+            return $this->json(['user' => $user], Response::HTTP_CREATED);
         }
         return $this->json([
             'message' => $formsErrorManager->getErrorsFromForm($form)
@@ -65,12 +65,14 @@ class AuthController extends AbstractController
                 'message' => 'missing credentials',
             ], Response::HTTP_UNAUTHORIZED);
         }
-
         $this->userRepository->upgradeApiToken($user, true);
-        return $this->json(
-            ['user' => $user],
-            Response::HTTP_ACCEPTED,
-            context: [AbstractNormalizer::GROUPS => ['USER_SELF', ...$user->getRoles()]]
+        $serializer = SerializerBuilder::create()->build();
+        $user = $serializer
+            ->toArray(
+                $user,
+                context: SerializationContext::create()->setGroups(['USER_SELF', ...$user->getRoles()])
+            );
+        return $this->json(['user' => $user], Response::HTTP_ACCEPTED,
         );
     }
 

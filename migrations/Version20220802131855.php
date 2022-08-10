@@ -20,9 +20,13 @@ final class Version20220802131855 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
+        $this->addSql('CREATE SEQUENCE "bus_stop_id_seq" INCREMENT BY 1 MINVALUE 1 START 1');
+        $this->addSql('CREATE SEQUENCE "transport_id_seq" INCREMENT BY 1 MINVALUE 1 START 1');
+        $this->addSql('CREATE SEQUENCE "transport_run_id_seq" INCREMENT BY 1 MINVALUE 1 START 1');
+        $this->addSql('CREATE SEQUENCE "transport_type_id_seq" INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE TABLE bus_stop (id INT NOT NULL, address VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE TABLE transport (id INT NOT NULL, type_id INT NOT NULL, number VARCHAR(10) NOT NULL, active BOOLEAN NOT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE UNIQUE INDEX UNIQ_66AB212E96901F54 ON transport (number)');
+        $this->addSql('CREATE TABLE transport (id INT NOT NULL, type_id INT NOT NULL, number INT NOT NULL, active BOOLEAN NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_66AB212E96901F54 ON transport (number, type_id)');
         $this->addSql('CREATE INDEX IDX_66AB212EC54C8C93 ON transport (type_id)');
         $this->addSql('CREATE TABLE transport_run (id INT NOT NULL, bus_stop_id INT NOT NULL, transport_id INT NOT NULL, arrival_time TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_8D5DE8AF921917F0 ON transport_run (bus_stop_id)');

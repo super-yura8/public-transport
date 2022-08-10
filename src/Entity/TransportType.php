@@ -6,6 +6,7 @@ use App\Repository\TransportTypeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: TransportTypeRepository::class)]
 class TransportType
@@ -16,6 +17,7 @@ class TransportType
     private int $id;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Groups(['TRANSPORT_PUBLIC'])]
     private string $name;
 
     #[ORM\OneToMany(mappedBy: 'type', targetEntity: Transport::class)]

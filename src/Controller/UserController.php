@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializerBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,10 +16,15 @@ class UserController extends AbstractController
     #[Route('/current', name: 'app_user')]
     public function index(#[CurrentUser] $user): Response
     {
+        $serializer = SerializerBuilder::create()->build();
+        $user = $serializer
+            ->toArray(
+                $user,
+                context: SerializationContext::create()->setGroups(['USER_SELF', ...$user->getRoles()])
+            );
         return $this->json(
             ['user' => $user],
             Response::HTTP_ACCEPTED,
-            context: [AbstractNormalizer::GROUPS => ['USER_SELF', ...$user->getRoles()]]
         );
     }
 }

@@ -65,6 +65,15 @@
             "fixtures/.gitignore"
         ]
     },
+    "jms/serializer-bundle": {
+        "version": "4.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "3.0",
+            "ref": "384cec52df45f3bfd46a09930d6960a58872b268"
+        }
+    },
     "nelmio/alice": {
         "version": "3.11",
         "recipe": {
