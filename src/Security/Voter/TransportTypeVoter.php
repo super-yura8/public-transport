@@ -2,14 +2,12 @@
 
 namespace App\Security\Voter;
 
-use App\Entity\Transport;
-use App\Entity\User;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class TransportVoter extends Voter
+class TransportTypeVoter extends Voter
 {
     public const EDIT = 'EDIT';
     public const DELETE = 'DELETE';
@@ -28,13 +26,12 @@ class TransportVoter extends Voter
         // replace with your own logic
         // https://symfony.com/doc/current/security/voters.html
         return in_array($attribute, [self::EDIT, self::VIEW, self::UPDATE, self::DELETE, self::CREATE]);
+
     }
 
     protected function voteOnAttribute(string $attribute, $subject, TokenInterface $token): bool
     {
         $user = $token->getUser();
-
-        // if the user is anonymous, do not grant access
 
 
         if ($this->security->isGranted('USER_SUPER_ADMIN')) {
@@ -60,6 +57,7 @@ class TransportVoter extends Voter
 
     private function canEdit($user): bool
     {
+
         return $user instanceof UserInterface && in_array('USER_ADMIN', $user->getRoles(), true);
     }
 

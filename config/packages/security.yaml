@@ -31,6 +31,9 @@ security:
         registration:
             pattern: ^/api/registration
             stateless: true
+        anonymus:
+            pattern: ^/api/transports
+            stateless: true
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false

@@ -14,6 +14,7 @@ class TransportType
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['TRANSPORT_PUBLIC'])]
     private int $id;
 
     #[ORM\Column(length: 255, unique: true)]
