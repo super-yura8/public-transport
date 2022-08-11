@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\TransportType;
 use App\Form\TransportTypeType;
 use App\Repository\TransportTypeRepository;
+use App\Service\FormsErrorManager;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerBuilder;
@@ -95,10 +96,9 @@ class TransportTypeController extends AbstractController
     }
 
     #[Route('/{id}', name: 'update', requirements: ['id' => '\d+'], methods: ['PATCH', 'PUT'])]
-    public function update(Request $request, $id): JsonResponse
+    public function update(Request $request, FormsErrorManager $formsErrorManager, $id): JsonResponse
     {
         $this->denyAccessUnlessGranted('UPDATE');
-        dd(123);
         $data = json_decode($request->getContent(), true);
         $type = $this->transportTypeRepository->find($id);
         if(!is_null($type)) {
@@ -122,10 +122,9 @@ class TransportTypeController extends AbstractController
                     );
                 return $this->json($type);
             } else {
-                return $this->json(
-                    ['message'=> 'The data is incorrect'],
-                    Response::HTTP_BAD_REQUEST
-                );
+                return $this->json([
+                    'message' => $formsErrorManager->getErrorsFromForm($form)
+                ], Response::HTTP_CONFLICT);
             }
         }
         return $this->json(['message' => 'The type does not exist'], Response::HTTP_NOT_FOUND);

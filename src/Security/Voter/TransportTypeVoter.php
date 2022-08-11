@@ -9,7 +9,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class TransportTypeVoter extends Voter
 {
-    public const EDIT = 'EDIT';
     public const DELETE = 'DELETE';
     public const UPDATE = 'UPDATE';
     public const VIEW = 'VIEW';
@@ -25,8 +24,7 @@ class TransportTypeVoter extends Voter
     {
         // replace with your own logic
         // https://symfony.com/doc/current/security/voters.html
-        return in_array($attribute, [self::EDIT, self::VIEW, self::UPDATE, self::DELETE, self::CREATE]);
-
+        return in_array($attribute, [self::VIEW, self::UPDATE, self::DELETE, self::CREATE]);
     }
 
     protected function voteOnAttribute(string $attribute, $subject, TokenInterface $token): bool
@@ -40,8 +38,6 @@ class TransportTypeVoter extends Voter
 
         // ... (check conditions and return true to grant permission) ...
         switch ($attribute) {
-            case self::EDIT:
-                return $this->canEdit($user);
             case self::VIEW:
                 return $this->canView($user);
             case self::UPDATE:
@@ -55,11 +51,6 @@ class TransportTypeVoter extends Voter
         return false;
     }
 
-    private function canEdit($user): bool
-    {
-
-        return $user instanceof UserInterface && in_array('USER_ADMIN', $user->getRoles(), true);
-    }
 
     private function canView($user): bool
     {
@@ -68,16 +59,16 @@ class TransportTypeVoter extends Voter
 
     private function canUpdate($user): bool
     {
-        return $user instanceof UserInterface && in_array('USER_ADMIN', $user->getRoles(), true);
+        return in_array('USER_ADMIN', $user->getRoles(), true);
     }
 
     private function canCreate($user): bool
     {
-        return $user instanceof UserInterface && in_array('USER_ADMIN', $user->getRoles(), true);
+        return in_array('USER_ADMIN', $user->getRoles(), true);
     }
 
     private function canDelete($user): bool
     {
-        return $user instanceof UserInterface && in_array('USER_ADMIN', $user->getRoles(), true);
+        return in_array('USER_ADMIN', $user->getRoles(), true);
     }
 }

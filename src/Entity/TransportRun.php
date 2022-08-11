@@ -16,7 +16,7 @@ class TransportRun
 
     #[ORM\ManyToOne(inversedBy: 'transportRuns')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?BusStop $busStop = null;
+    private ?TransportStop $transportStop = null;
 
     #[ORM\ManyToOne(inversedBy: 'transportRuns')]
     #[ORM\JoinColumn(nullable: false)]
@@ -30,14 +30,14 @@ class TransportRun
         return $this->id;
     }
 
-    public function getBusStop(): ?BusStop
+    public function getTransportStop(): ?TransportStop
     {
-        return $this->busStop;
+        return $this->transportStop;
     }
 
-    public function setBusStop(?BusStop $busStop): self
+    public function setTransportStop(?TransportStop $transportStop): self
     {
-        $this->busStop = $busStop;
+        $this->transportStop = $transportStop;
 
         return $this;
     }

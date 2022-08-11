@@ -2,26 +2,26 @@
 
 namespace App\Repository;
 
-use App\Entity\BusStop;
+use App\Entity\TransportStop;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<BusStop>
+ * @extends ServiceEntityRepository<TransportStop>
  *
- * @method BusStop|null find($id, $lockMode = null, $lockVersion = null)
- * @method BusStop|null findOneBy(array $criteria, array $orderBy = null)
- * @method BusStop[]    findAll()
- * @method BusStop[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method TransportStop|null find($id, $lockMode = null, $lockVersion = null)
+ * @method TransportStop|null findOneBy(array $criteria, array $orderBy = null)
+ * @method TransportStop[]    findAll()
+ * @method TransportStop[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class BusStopRepository extends ServiceEntityRepository
+class TransportStopRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, BusStop::class);
+        parent::__construct($registry, TransportStop::class);
     }
 
-    public function add(BusStop $entity, bool $flush = false): void
+    public function add(TransportStop $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -30,7 +30,7 @@ class BusStopRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(BusStop $entity, bool $flush = false): void
+    public function remove(TransportStop $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -40,7 +40,7 @@ class BusStopRepository extends ServiceEntityRepository
     }
 
 //    /**
-//     * @return BusStop[] Returns an array of BusStop objects
+//     * @return TransportStop[] Returns an array of TransportStop objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -54,7 +54,7 @@ class BusStopRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?BusStop
+//    public function findOneBySomeField($value): ?TransportStop
 //    {
 //        return $this->createQueryBuilder('b')
 //            ->andWhere('b.exampleField = :val')

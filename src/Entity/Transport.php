@@ -22,7 +22,7 @@ class Transport
     private int $id;
 
     #[Assert\NotBlank]
-    #[ORM\Column(unique: true)]
+    #[ORM\Column]
     #[Groups(['TRANSPORT_PUBLIC'])]
     private int $number;
 
@@ -37,7 +37,6 @@ class Transport
     private TransportType $type;
 
     #[ORM\OneToMany(mappedBy: 'transport', targetEntity: TransportRun::class, orphanRemoval: true)]
-    #[Groups(['TRANSPORT_PUBLIC'])]
     private Collection $transportRuns;
 
     public function __construct()

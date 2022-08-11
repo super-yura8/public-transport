@@ -31,15 +31,11 @@ security:
         registration:
             pattern: ^/api/registration
             stateless: true
-        anonymus:
-            pattern: ^/api/transports
-            stateless: true
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
             pattern: ^/api
-            lazy: true
             provider: app_user_provider
             custom_authenticator: App\Security\ApiTokenAuthenticator
 
@@ -57,7 +53,7 @@ security:
         # - { path: ^/profile, roles: ROLE_USER }
 #        - { path: ^/api/registration, roles: PUBLIC_ACCESS }
 #        - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
-#        - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/transports, roles: IS_AUTHENTICATED_ANONYMOUSLY }
 #        - { path: ^/api/registration, roles: IS_AUTHENTICATED_ANONYMOUSLY }
 #        - { path: ^/api,       roles: IS_AUTHENTICATED_ANONYMOUSLY }
 
