@@ -16,11 +16,11 @@ class TransportStop
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["TRANSPORT_PUBLIC"])]
+    #[Groups(["TRANSPORT_PUBLIC", "TRANSPORT_RUN_PUBLIC"])]
     private int $id;
 
     #[ORM\Column(length: 255, unique: true)]
-    #[Groups(["TRANSPORT_PUBLIC"])]
+    #[Groups(["TRANSPORT_PUBLIC", "TRANSPORT_RUN_PUBLIC"])]
     private string $address;
 
     #[ORM\OneToMany(mappedBy: 'transportStop', targetEntity: TransportRun::class, orphanRemoval: true)]

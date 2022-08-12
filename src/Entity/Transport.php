@@ -18,12 +18,12 @@ class Transport
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['TRANSPORT_PUBLIC'])]
+    #[Groups(['TRANSPORT_PUBLIC', 'TRANSPORT_RUN_PUBLIC'])]
     private int $id;
 
     #[Assert\NotBlank]
     #[ORM\Column]
-    #[Groups(['TRANSPORT_PUBLIC'])]
+    #[Groups(['TRANSPORT_PUBLIC', 'TRANSPORT_RUN_PUBLIC'])]
     private int $number;
 
 
@@ -33,11 +33,14 @@ class Transport
 
     #[ORM\ManyToOne(inversedBy: 'transports')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['TRANSPORT_PUBLIC'])]
+    #[Groups(['TRANSPORT_PUBLIC', 'TRANSPORT_RUN_PUBLIC'])]
     private TransportType $type;
 
     #[ORM\OneToMany(mappedBy: 'transport', targetEntity: TransportRun::class, orphanRemoval: true)]
-    private Collection $transportRuns;
+    private ?Collection $transportRuns = null;
+
+    #[ORM\OneToOne(mappedBy: 'transport', cascade: ['persist', 'remove'])]
+    private ?TransportStart $transportStart = null;
 
     public function __construct()
     {
@@ -111,6 +114,23 @@ class Transport
                 $transportRun->setTransport(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getTransportStart(): ?TransportStart
+    {
+        return $this->transportStart;
+    }
+
+    public function setTransportStart(TransportStart $transportStart): self
+    {
+        // set the owning side of the relation if necessary
+        if ($transportStart->getTransport() !== $this) {
+            $transportStart->setTransport($this);
+        }
+
+        $this->transportStart = $transportStart;
 
         return $this;
     }

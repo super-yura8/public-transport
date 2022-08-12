@@ -14,11 +14,11 @@ class TransportType
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['TRANSPORT_PUBLIC'])]
+    #[Groups(['TRANSPORT_PUBLIC', 'TRANSPORT_RUN_PUBLIC'])]
     private int $id;
 
     #[ORM\Column(length: 255, unique: true)]
-    #[Groups(['TRANSPORT_PUBLIC'])]
+    #[Groups(['TRANSPORT_PUBLIC', 'TRANSPORT_RUN_PUBLIC'])]
     private string $name;
 
     #[ORM\OneToMany(mappedBy: 'type', targetEntity: Transport::class)]

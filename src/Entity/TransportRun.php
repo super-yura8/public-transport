@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\TransportRunsRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: TransportRunsRepository::class)]
 class TransportRun
@@ -12,18 +13,22 @@ class TransportRun
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    #[Groups(['TRANSPORT_RUN_PUBLIC'])]
+    private int $id;
 
     #[ORM\ManyToOne(inversedBy: 'transportRuns')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?TransportStop $transportStop = null;
+    #[Groups(['TRANSPORT_RUN_PUBLIC'])]
+    private TransportStop $transportStop;
 
     #[ORM\ManyToOne(inversedBy: 'transportRuns')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Transport $transport = null;
+    #[Groups(['TRANSPORT_RUN_PUBLIC'])]
+    private Transport $transport;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $arrivalTime = null;
+    #[ORM\Column]
+    #[Groups(['TRANSPORT_RUN_PUBLIC'])]
+    private int $arrivalTime;
 
     public function getId(): ?int
     {
@@ -54,12 +59,12 @@ class TransportRun
         return $this;
     }
 
-    public function getArrivalTime(): ?\DateTimeInterface
+    public function getArrivalTime(): int
     {
         return $this->arrivalTime;
     }
 
-    public function setArrivalTime(\DateTimeInterface $arrivalTime): self
+    public function setArrivalTime(int $arrivalTime): self
     {
         $this->arrivalTime = $arrivalTime;
 
