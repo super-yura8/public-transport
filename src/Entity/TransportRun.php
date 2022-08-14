@@ -13,12 +13,12 @@ class TransportRun
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['TRANSPORT_RUN_PUBLIC'])]
+    #[Groups(['TRANSPORT_RUN_PUBLIC', 'TRANSPORT_PUBLIC'])]
     private int $id;
 
     #[ORM\ManyToOne(inversedBy: 'transportRuns')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['TRANSPORT_RUN_PUBLIC'])]
+    #[Groups(['TRANSPORT_RUN_PUBLIC', 'TRANSPORT_PUBLIC'])]
     private TransportStop $transportStop;
 
     #[ORM\ManyToOne(inversedBy: 'transportRuns')]
@@ -27,7 +27,7 @@ class TransportRun
     private Transport $transport;
 
     #[ORM\Column]
-    #[Groups(['TRANSPORT_RUN_PUBLIC'])]
+    #[Groups(['TRANSPORT_RUN_PUBLIC', 'TRANSPORT_PUBLIC'])]
     private int $arrivalTime;
 
     public function getId(): ?int

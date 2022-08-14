@@ -37,9 +37,11 @@ class Transport
     private TransportType $type;
 
     #[ORM\OneToMany(mappedBy: 'transport', targetEntity: TransportRun::class, orphanRemoval: true)]
+    #[Groups(['TRANSPORT_PUBLIC'])]
     private ?Collection $transportRuns = null;
 
     #[ORM\OneToOne(mappedBy: 'transport', cascade: ['persist', 'remove'])]
+    #[Groups(['TRANSPORT_PUBLIC'])]
     private ?TransportStart $transportStart = null;
 
     public function __construct()

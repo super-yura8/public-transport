@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\TransportStartRepository;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: TransportStartRepository::class)]
 class TransportStart
@@ -11,13 +12,16 @@ class TransportStart
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['TRANSPORT_RUN_PUBLIC', 'TRANSPORT_PUBLIC'])]
     private int $id;
 
-    #[ORM\OneToOne(inversedBy: 'transportStart', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'transportStart')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['TRANSPORT_RUN_PUBLIC'])]
     private Transport $transport;
 
     #[ORM\Column]
+    #[Groups(['TRANSPORT_RUN_PUBLIC', 'TRANSPORT_PUBLIC'])]
     private array $times = [];
 
     public function getId(): ?int
