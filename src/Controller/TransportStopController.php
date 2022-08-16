@@ -7,7 +7,10 @@ use App\Form\TransportStopType;
 use App\Repository\TransportStopRepository;
 use App\Service\FormsErrorManager;
 use Doctrine\ORM\EntityManagerInterface;
+use JMS\Serializer\Naming\IdenticalPropertyNamingStrategy;
+use JMS\Serializer\Naming\SerializedNameAnnotationStrategy;
 use JMS\Serializer\SerializationContext;
+use JMS\Serializer\Serializer;
 use JMS\Serializer\SerializerBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,11 +24,17 @@ class TransportStopController extends AbstractController
 
     private TransportStopRepository $transportStopRepository;
     private EntityManagerInterface $em;
+    private Serializer $serializer;
+
 
     public function __construct(TransportStopRepository $transportStopRepository, EntityManagerInterface $em)
     {
         $this->transportStopRepository = $transportStopRepository;
         $this->em = $em;
+        $this->serializer = SerializerBuilder::create()->setPropertyNamingStrategy(
+            new SerializedNameAnnotationStrategy(
+                new IdenticalPropertyNamingStrategy()
+            ))->build();
     }
 
     #[Route('/', name: 'get_all', methods: ['GET'])]
@@ -33,8 +42,7 @@ class TransportStopController extends AbstractController
     {
         $this->denyAccessUnlessGranted('VIEW');
         $data = $this->transportStopRepository->findAll();
-        $serializer = SerializerBuilder::create()->build();
-        $data = $serializer
+        $data = $this->serializer
             ->toArray(
                 $data,
                 context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC'])
@@ -49,8 +57,7 @@ class TransportStopController extends AbstractController
         $this->denyAccessUnlessGranted('VIEW');
         $stop = $this->transportStopRepository->find($id);
         if (!is_null($stop)) {
-            $serializer = SerializerBuilder::create()->build();
-            $stop = $serializer
+                $stop = $this->serializer
                 ->toArray(
                     $stop,
                     context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC'])
@@ -79,8 +86,7 @@ class TransportStopController extends AbstractController
         if ($form->isValid()) {
             $this->em->persist($stop);
             $this->em->flush();
-            $serializer = SerializerBuilder::create()->build();
-            $stop = $serializer
+                $stop = $this->serializer
                 ->toArray(
                     $stop,
                     context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC'])
@@ -124,8 +130,7 @@ class TransportStopController extends AbstractController
             }
             if ($form->isValid()) {
                 $this->em->flush();
-                $serializer = SerializerBuilder::create()->build();
-                $stop = $serializer
+                        $stop = $this->serializer
                     ->toArray(
                         $stop,
                         context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC'])

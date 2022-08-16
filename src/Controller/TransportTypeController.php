@@ -7,7 +7,10 @@ use App\Form\TransportTypeType;
 use App\Repository\TransportTypeRepository;
 use App\Service\FormsErrorManager;
 use Doctrine\ORM\EntityManagerInterface;
+use JMS\Serializer\Naming\IdenticalPropertyNamingStrategy;
+use JMS\Serializer\Naming\SerializedNameAnnotationStrategy;
 use JMS\Serializer\SerializationContext;
+use JMS\Serializer\Serializer;
 use JMS\Serializer\SerializerBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,12 +24,16 @@ class TransportTypeController extends AbstractController
 
     private TransportTypeRepository $transportTypeRepository;
     private EntityManagerInterface $em;
+    private Serializer $serializer;
 
     public function __construct(TransportTypeRepository $transportTypeRepository, EntityManagerInterface $em)
     {
         $this->transportTypeRepository = $transportTypeRepository;
         $this->em = $em;
-
+        $this->serializer = SerializerBuilder::create()->setPropertyNamingStrategy(
+            new SerializedNameAnnotationStrategy(
+                new IdenticalPropertyNamingStrategy()
+            ))->build();
     }
 
     #[Route('/', name: 'get_all', methods: ['GET'])]
@@ -34,8 +41,7 @@ class TransportTypeController extends AbstractController
     {
         $this->denyAccessUnlessGranted('VIEW');
         $data = $this->transportTypeRepository->findAll();
-        $serializer = SerializerBuilder::create()->build();
-        $data = $serializer->toArray($data, context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC']));
+        $data = $this->serializer->toArray($data, context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC']));
         return $this->json($data);
     }
 
@@ -44,8 +50,7 @@ class TransportTypeController extends AbstractController
     {
         $this->denyAccessUnlessGranted('VIEW');
         $data = $this->transportTypeRepository->find($id);
-        $serializer = SerializerBuilder::create()->build();
-        $data = $serializer->toArray($data, context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC']));
+        $data = $this->serializer->toArray($data, context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC']));
         return $this->json($data);
     }
 
@@ -68,8 +73,7 @@ class TransportTypeController extends AbstractController
         if ($form->isValid()) {
             $this->em->persist($type);
             $this->em->flush();
-            $serializer = SerializerBuilder::create()->build();
-            $type = $serializer
+            $type = $this->serializer
                 ->toArray(
                     $type,
                     context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC'])
@@ -114,8 +118,7 @@ class TransportTypeController extends AbstractController
             }
             if ($form->isValid()) {
                 $this->em->flush();
-                $serializer = SerializerBuilder::create()->build();
-                $type = $serializer
+                $type = $this->serializer
                     ->toArray(
                         $type,
                         context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC'])
