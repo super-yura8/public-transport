@@ -50,8 +50,11 @@ class TransportTypeController extends AbstractController
     {
         $this->denyAccessUnlessGranted('VIEW');
         $data = $this->transportTypeRepository->find($id);
-        $data = $this->serializer->toArray($data, context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC']));
-        return $this->json($data);
+        if(!is_null($data)) {
+            $data = $this->serializer->toArray($data, context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC']));
+            return $this->json($data);
+        }
+        return $this->json(['message' => 'The type does not exist'], Response::HTTP_NOT_FOUND);
     }
 
     #[Route('/', name: 'create', methods: ['POST'])]
