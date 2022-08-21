@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\TransportStartRepository;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TransportStartRepository::class)]
 class TransportStart
@@ -17,6 +18,7 @@ class TransportStart
 
     #[ORM\OneToOne(inversedBy: 'transportStart')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotBlank]
     #[Groups(['TRANSPORT_RUN_PUBLIC'])]
     private Transport $transport;
 

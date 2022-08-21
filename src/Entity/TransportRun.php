@@ -6,6 +6,7 @@ use App\Repository\TransportRunsRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TransportRunsRepository::class)]
 class TransportRun
@@ -18,11 +19,13 @@ class TransportRun
 
     #[ORM\ManyToOne(inversedBy: 'transportRuns')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotBlank]
     #[Groups(['TRANSPORT_RUN_PUBLIC', 'TRANSPORT_PUBLIC'])]
     private TransportStop $transportStop;
 
     #[ORM\ManyToOne(inversedBy: 'transportRuns')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotBlank]
     #[Groups(['TRANSPORT_RUN_PUBLIC'])]
     private Transport $transport;
 

@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Groups;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TransportStopRepository::class)]
 #[UniqueEntity(fields: ["address"], message: "There is already a stop with this address")]
@@ -21,6 +22,7 @@ class TransportStop
 
     #[ORM\Column(length: 255, unique: true)]
     #[Groups(["TRANSPORT_PUBLIC", "TRANSPORT_RUN_PUBLIC"])]
+    #[Assert\NotBlank]
     private string $address;
 
     #[ORM\OneToMany(mappedBy: 'transportStop', targetEntity: TransportRun::class, orphanRemoval: true)]
