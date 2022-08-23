@@ -34,6 +34,10 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        anonymus_access:
+            pattern: ^/api/transports/((runs|types|stops|starts)/\d*)?
+            security: false
+            methods: ['GET']
         main:
             pattern: ^/api
             provider: app_user_provider
@@ -53,7 +57,7 @@ security:
         # - { path: ^/profile, roles: ROLE_USER }
 #        - { path: ^/api/registration, roles: PUBLIC_ACCESS }
 #        - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
-#        - { path: ^/api/transports/, roles: PUBLIC_ACCESS }
+#        - { path: ^/api/transports/, roles: IS_ANONYMOUSLY }
 #        - { path: ^/api/registration, roles: IS_AUTHENTICATED_ANONYMOUSLY }
 #        - { path: ^/api,       roles: IS_AUTHENTICATED_ANONYMOUSLY }
 
