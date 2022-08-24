@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 
 #[Route('/api/transports', name: 'api_transport_')]
@@ -147,6 +148,44 @@ class TransportController extends AbstractController
                     'message' => $formsErrorManager->getErrorsFromForm($form)
                 ], Response::HTTP_CONFLICT);
             }
+        }
+        return $this->json(['message' => 'The transport does not exist'], Response::HTTP_NOT_FOUND);
+    }
+
+    #[Route('/favorites', methods: ['GET'])]
+    public function getFavorites(#[CurrentUser] $user): JsonResponse
+    {
+        $transport = $this->serializer
+            ->toArray(
+                $user->getTransports(),
+                context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC'])
+            );
+        return $this->json($transport);
+    }
+
+    #[Route('/favorites', methods: ['POST'])]
+    public function addToTransportToFavorite(#[CurrentUser] $user, Request $request): Response
+    {
+        $data = json_decode($request->getContent(), true);
+        if(isset($data['transport']) && !is_null($data['transport'])) {
+            if(!is_null($transport = $this->transportRepository->find($data['transport']))) {
+                $user->addTransport($transport);
+                $this->em->persist($user);
+                $this->em->flush();
+                return new Response(status: Response::HTTP_ACCEPTED);
+            }
+        }
+        return $this->json(['message' => 'The transport does not exist'], Response::HTTP_NOT_FOUND);
+    }
+
+    #[Route('/favorites/{id}', requirements: ['id' => '\d+'], methods: ['DELETE'])]
+    public function removeFavoriteTransport(#[CurrentUser] $user, $id): Response
+    {
+        if(!is_null($transport = $this->transportRepository->find($id))) {
+                $user->removeTransport($transport);
+                $this->em->persist($user);
+                $this->em->flush();
+                return new Response(status: Response::HTTP_ACCEPTED);
         }
         return $this->json(['message' => 'The transport does not exist'], Response::HTTP_NOT_FOUND);
     }

@@ -3,7 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinTable;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -41,10 +43,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['ROLE_ADMIN'])]
     private string $password;
 
+    #[ORM\ManyToMany(targetEntity: Transport::class)]
+    #[JoinTable(name: "favorite_transport")]
+    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id")]
+    #[ORM\InverseJoinColumn(name: "transport_id", referencedColumnName: "id")]
+    private ?\Doctrine\Common\Collections\Collection $transports = null;
+
 
     #[ORM\Column(length: 255, unique: true)]
     #[Groups(['ROLE_ADMIN', 'USER_SELF'])]
     private string $api_token;
+
+    public function __construct()
+    {
+        $this->transports = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -147,5 +160,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * @return \Doctrine\Common\Collections\Collection<int, Transport>
+     */
+    public function getTransports(): \Doctrine\Common\Collections\Collection
+    {
+        return $this->transports;
+    }
+
+    public function addTransport(Transport $transport): self
+    {
+        if (!$this->transports->contains($transport)) {
+            $this->transports->add($transport);
+        }
+
+        return $this;
+    }
+
+    public function removeTransport(Transport $transport): self
+    {
+        $this->transports->removeElement($transport);
+
+        return $this;
+    }
 
 }
