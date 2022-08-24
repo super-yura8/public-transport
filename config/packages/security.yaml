@@ -35,7 +35,7 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         anonymus_access:
-            pattern: ^/api/transports/((runs|types|stops|starts)/\d*)?
+            pattern: ^/api/transports/(((runs|types|stops|starts)/\d+)\d+)?$
             security: false
             methods: ['GET']
         main:
