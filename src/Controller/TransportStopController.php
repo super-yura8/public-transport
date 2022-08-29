@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\TransportStop;
 use App\Form\TransportStopType;
 use App\Repository\TransportRepository;
+use App\Repository\TransportRunsRepository;
+use App\Repository\TransportStartRepository;
 use App\Repository\TransportStopRepository;
 use App\Service\FormsErrorManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,7 +21,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('api/transports/stops', name: 'api_transport_stop_')]
+#[Route('api/transports/stops', name: 'api_transport_stop_', requirements: ['id' => '\d+'])]
 class TransportStopController extends AbstractController
 {
 
@@ -51,14 +53,14 @@ class TransportStopController extends AbstractController
         return $this->json($data);
     }
 
-    #[Route('/{id}', name: 'get', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[Route('/{id}', name: 'get', methods: ['GET'])]
     public function get($id): JsonResponse
     {
 //        dd($this->get('security.token_storage')->getToken()->getUser());
         $this->denyAccessUnlessGranted('VIEW');
         $stop = $this->transportStopRepository->find($id);
         if (!is_null($stop)) {
-                $stop = $this->serializer
+            $stop = $this->serializer
                 ->toArray(
                     $stop,
                     context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC'])
@@ -80,14 +82,14 @@ class TransportStopController extends AbstractController
             $form->submit($data);
         } catch (\Throwable $exception) {
             return $this->json(
-                ['message'=> 'The data is incorrect or is not full'],
+                ['message' => 'The data is incorrect or is not full'],
                 Response::HTTP_BAD_REQUEST
             );
         }
         if ($form->isValid()) {
             $this->em->persist($stop);
             $this->em->flush();
-                $stop = $this->serializer
+            $stop = $this->serializer
                 ->toArray(
                     $stop,
                     context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC'])
@@ -100,7 +102,7 @@ class TransportStopController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: 'delete', requirements: ['id' => '\d+'], methods: ['DELETE'])]
+    #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete($id): JsonResponse
     {
         $this->denyAccessUnlessGranted('DELETE');
@@ -112,8 +114,8 @@ class TransportStopController extends AbstractController
         return $this->json(['message' => 'The stop does not exist'], Response::HTTP_NOT_FOUND);
     }
 
-    #[Route('/{id}', name: 'update', requirements: ['id' => '\d+'], methods: ['PATCH', 'PUT'])]
-    public function update(Request $request, FormsErrorManager $formsErrorManager , $id): JsonResponse
+    #[Route('/{id}', name: 'update', methods: ['PATCH', 'PUT'])]
+    public function update(Request $request, FormsErrorManager $formsErrorManager, $id): JsonResponse
     {
         $this->denyAccessUnlessGranted('UPDATE');
         $data = json_decode($request->getContent(), true);
@@ -125,13 +127,13 @@ class TransportStopController extends AbstractController
                 $form->submit($data, $clearMissing);
             } catch (\Throwable $exception) {
                 return $this->json(
-                    ['message'=> 'The data is incorrect or is not full'],
+                    ['message' => 'The data is incorrect or is not full'],
                     Response::HTTP_BAD_REQUEST
                 );
             }
             if ($form->isValid()) {
                 $this->em->flush();
-                        $stop = $this->serializer
+                $stop = $this->serializer
                     ->toArray(
                         $stop,
                         context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC'])
@@ -146,7 +148,7 @@ class TransportStopController extends AbstractController
         return $this->json(['message' => 'The transport does not exist'], Response::HTTP_NOT_FOUND);
     }
 
-    #[Route('/{id}/transports', name:'transports', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[Route('/{id}/transports', name: 'transports', methods: ['GET'])]
     public function getTransportsByStop($id, TransportRepository $transportRepository)
     {
         $this->denyAccessUnlessGranted('VIEW');
@@ -157,6 +159,34 @@ class TransportStopController extends AbstractController
                     context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC'])
                 );
             return $this->json($transports);
+        }
+        return $this->json(['message' => 'The stop does not exist'], Response::HTTP_NOT_FOUND);
+    }
+
+    #[Route('/{stop}/transports/{transport}', name: 'transports_times',
+        requirements: ['stop' => '\d+', 'transport' => '\d+'], methods: ['GET'])]
+    public function getTransportDestinationTimes(
+        $stop,
+        $transport,
+        TransportRunsRepository $transportRunsRepository,
+        TransportStartRepository $transportStartRepository
+    )
+    {
+        $transportRun = $transportRunsRepository->findOneBy(['transport' => $transport, 'transportStop' => $stop]);
+        $transportStart = $transportStartRepository->findOneBy(['transport' => $transport]);
+        if (!is_null($transportStart)) {
+            if (!is_null($transportRun)) {
+                $times = $transportStart->getTimes();
+                $arrivalTime = $transportRun->getArrivalTime();
+                $times = array_map(
+                    function ($x) use ($arrivalTime) {
+                        return $x + $arrivalTime;
+                    },
+                    $times
+                );
+                return $this->json($times);
+            }
+            return $this->json(['message' => "The transport route has not yet been launched"], Response::HTTP_NOT_FOUND);
         }
         return $this->json(['message' => 'The stop does not exist'], Response::HTTP_NOT_FOUND);
     }
