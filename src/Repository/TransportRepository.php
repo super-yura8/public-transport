@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Transport;
+use App\Entity\TransportRun;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -40,20 +41,17 @@ class TransportRepository extends ServiceEntityRepository
     }
 
 
-//    /**
-//     * @return Transport[] Returns an array of Transport objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('t')
-//            ->andWhere('t.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('t.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * @return Transport[] Returns an array of Transport objects
+     */
+    public function findByStop($value): array
+    {
+        return $this->createQueryBuilder('t')
+            ->join('t.transportRuns', 'tr')
+            ->where('tr.transportStop = :val')
+            ->setParameter('val', $value)
+            ->getQuery()->getResult();
+    }
 
 //    public function findOneBySomeField($value): ?Transport
 //    {

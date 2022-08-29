@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\TransportStop;
 use App\Form\TransportStopType;
+use App\Repository\TransportRepository;
 use App\Repository\TransportStopRepository;
 use App\Service\FormsErrorManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -143,5 +144,20 @@ class TransportStopController extends AbstractController
             }
         }
         return $this->json(['message' => 'The transport does not exist'], Response::HTTP_NOT_FOUND);
+    }
+
+    #[Route('/{id}/transports', name:'transports', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function getTransportsByStop($id, TransportRepository $transportRepository)
+    {
+        $this->denyAccessUnlessGranted('VIEW');
+        if (!is_null($this->transportStopRepository->find($id))) {
+            $transports = $this->serializer
+                ->toArray(
+                    $transportRepository->findByStop($id),
+                    context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC'])
+                );
+            return $this->json($transports);
+        }
+        return $this->json(['message' => 'The stop does not exist'], Response::HTTP_NOT_FOUND);
     }
 }
