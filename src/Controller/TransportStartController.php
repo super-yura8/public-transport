@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/transports/starts', name: 'api_transport_start_')]
+#[Route('/api/transports/starts', name: 'api_transport_start_', requirements: ['id' => '\d+'])]
 class TransportStartController extends AbstractController
 {
     private TransportStartRepository $transportStartRepository;
@@ -46,7 +46,7 @@ class TransportStartController extends AbstractController
         return $this->json($data);
     }
 
-    #[Route('/{id}', name: 'get', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[Route('/{id}', name: 'get', methods: ['GET'])]
     public function get($id): JsonResponse
     {
         $this->denyAccessUnlessGranted('VIEW');
@@ -95,7 +95,7 @@ class TransportStartController extends AbstractController
         }
     }
 
-    #[Route('/{id}', name: 'delete', requirements: ['id' => '\d+'], methods: ['DELETE'])]
+    #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete($id): JsonResponse
     {
         $this->denyAccessUnlessGranted('DELETE');
@@ -107,7 +107,7 @@ class TransportStartController extends AbstractController
         return $this->json(['message' => 'The start does not exist'], Response::HTTP_NOT_FOUND);
     }
 
-    #[Route('/{id}', name: 'update', requirements: ['id' => '\d+'], methods: ['PATCH', 'PUT'])]
+    #[Route('/{id}', name: 'update', methods: ['PATCH', 'PUT'])]
     public function update(Request $request, FormsErrorManager $formsErrorManager, $id): JsonResponse
     {
         $this->denyAccessUnlessGranted('UPDATE');
