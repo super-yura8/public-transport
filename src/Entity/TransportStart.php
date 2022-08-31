@@ -50,6 +50,7 @@ class TransportStart
 
     public function setTimes(array $times): self
     {
+        sort($times);
         $this->times = $times;
 
         return $this;

@@ -149,7 +149,7 @@ class TransportStopController extends AbstractController
     }
 
     #[Route('/{id}/transports', name: 'transports', methods: ['GET'])]
-    public function getTransportsByStop($id, TransportRepository $transportRepository)
+    public function getTransportsByStop($id, TransportRepository $transportRepository): JsonResponse
     {
         $this->denyAccessUnlessGranted('VIEW');
         if (!is_null($this->transportStopRepository->find($id))) {
@@ -170,8 +170,9 @@ class TransportStopController extends AbstractController
         $transport,
         TransportRunsRepository $transportRunsRepository,
         TransportStartRepository $transportStartRepository
-    )
+    ): JsonResponse
     {
+        $this->denyAccessUnlessGranted('VIEW');
         $transportRun = $transportRunsRepository->findOneBy(['transport' => $transport, 'transportStop' => $stop]);
         $transportStart = $transportStartRepository->findOneBy(['transport' => $transport]);
         if (!is_null($transportStart)) {
@@ -190,4 +191,44 @@ class TransportStopController extends AbstractController
         }
         return $this->json(['message' => 'The stop does not exist'], Response::HTTP_NOT_FOUND);
     }
+
+    #[Route('/{id}/transports/closest', name: 'transports_closest', methods: ['GET'])]
+    public function getClosestTransportsToStop($id, TransportRepository $transportRepository): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('VIEW');
+        $stop = $this->transportStopRepository->find($id);
+        if (!is_null($stop)) {
+            $closest = [];
+            $minutes = intval(date('H')) * 60 + intval(date('m'));
+            foreach ($stop->getTransportRuns() as $run) {
+                $arrivalTime = $run->getArrivalTime();
+                $start = $run->getTransport()?->getTransportStart();
+
+                if (!is_null($start)) {
+                    $times = $start->getTimes();
+                    if ($times[count($times) - 1] + $arrivalTime > $minutes) {
+                        for ($i = 0; $i < count($times); $i++) {
+                            if ($times[$i] + $arrivalTime >= $minutes) {
+                                $closest[] = [
+                                    'transport' => $run->getTransport(),
+                                    'time' => $times[$i] + $arrivalTime
+                                ];
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            return $this->json(
+                $this->serializer
+                    ->toArray(
+                        $closest,
+                        context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC'])
+                    )
+            );
+        }
+        return $this->json(['message' => 'The stop does not exist'], Response::HTTP_NOT_FOUND);
+    }
+
+
 }
