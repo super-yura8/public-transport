@@ -193,13 +193,17 @@ class TransportStopController extends AbstractController
     }
 
     #[Route('/{id}/transports/closest', name: 'transports_closest', methods: ['GET'])]
-    public function getClosestTransportsToStop($id, TransportRepository $transportRepository): JsonResponse
+    public function getClosestTransportsToStop($id, TransportRepository $transportRepository, Request $request): JsonResponse
     {
         $this->denyAccessUnlessGranted('VIEW');
         $stop = $this->transportStopRepository->find($id);
         if (!is_null($stop)) {
             $closest = [];
-            $minutes = intval(date('H')) * 60 + intval(date('m'));
+            if (!is_null($time = $request->query->get('timestamp'))) {
+                $minutes = intval(date('H', $time)) * 60 + intval(date('m', $time));
+            } else {
+                $minutes = intval(date('H')) * 60 + intval(date('m'));
+            }
             foreach ($stop->getTransportRuns() as $run) {
                 $arrivalTime = $run->getArrivalTime();
                 $start = $run->getTransport()?->getTransportStart();
