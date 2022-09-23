@@ -23,7 +23,7 @@ class TransportRunsTest extends WebTestCase
         $loader = new NativeLoader();
         $this->client = self::createClient();
         $kernel = static::bootKernel();
-        $objectSet = $loader->loadFile($kernel->getProjectDir().'/fixtures/data.yaml');
+        $objectSet = $loader->loadFile($kernel->getProjectDir() . '/fixtures/data.yaml');
         $this->em = $kernel->getContainer()
             ->get('doctrine')
             ->getManager();
@@ -56,7 +56,7 @@ class TransportRunsTest extends WebTestCase
         $this->assertArrayHasKey('transportStop', $data);
         $this->assertArrayHasKey('arrivalTime', $data);
         $this->assertArrayHasKey('id', $data);
-        $this->assertSame($run->getTransport()->getId(),$data['transport']['id']);
+        $this->assertSame($run->getTransport()->getId(), $data['transport']['id']);
         $this->assertSame($run->getTransportStop()->getId(), $data['transportStop']['id']);
         $this->assertSame($run->getArrivalTime(), $data['arrivalTime']);
         $this->assertSame($run->getId(), $data['id']);
@@ -98,7 +98,7 @@ class TransportRunsTest extends WebTestCase
         $this->assertArrayHasKey('transportStop', $data);
         $this->assertArrayHasKey('arrivalTime', $data);
         $this->assertArrayHasKey('id', $data);
-        $this->assertSame($run->getTransport()->getId(),$data['transport']['id']);
+        $this->assertSame($run->getTransport()->getId(), $data['transport']['id']);
         $this->assertSame($run->getTransportStop()->getId(), $data['transportStop']['id']);
         $this->assertSame(333, $data['arrivalTime']);
         $this->assertSame($run->getId(), $data['id']);

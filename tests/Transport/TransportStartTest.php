@@ -22,7 +22,7 @@ class TransportStartTest extends WebTestCase
         $loader = new NativeLoader();
         $this->client = self::createClient();
         $kernel = static::bootKernel();
-        $objectSet = $loader->loadFile($kernel->getProjectDir().'/fixtures/data.yaml');
+        $objectSet = $loader->loadFile($kernel->getProjectDir() . '/fixtures/data.yaml');
         $this->em = $kernel->getContainer()
             ->get('doctrine')
             ->getManager();
@@ -54,14 +54,14 @@ class TransportStartTest extends WebTestCase
         $this->assertArrayHasKey('transport', $data);
         $this->assertArrayHasKey('times', $data);
         $this->assertArrayHasKey('id', $data);
-        $this->assertSame($start->getTransport()->getId(),$data['transport']['id']);
+        $this->assertSame($start->getTransport()->getId(), $data['transport']['id']);
         $this->assertSame($start->getTimes(), $data['times']);
         $this->assertSame($start->getId(), $data['id']);
     }
 
     public function testCreate(): void
     {
-        $times = [0,1020];
+        $times = [0, 1020];
         $transportId = $this->em->getRepository(Transport::class)->findOneBy(['number' => 1111])->getId();
         $this->client->request('POST', '/api/transports/starts/', content: json_encode([
             'transport' => $transportId,
@@ -92,7 +92,7 @@ class TransportStartTest extends WebTestCase
         $this->assertArrayHasKey('transport', $data);
         $this->assertArrayHasKey('times', $data);
         $this->assertArrayHasKey('id', $data);
-        $this->assertSame($start->getTransport()->getId(),$data['transport']['id']);
+        $this->assertSame($start->getTransport()->getId(), $data['transport']['id']);
         $this->assertSame([232, 300], $data['times']);
         $this->assertSame($start->getId(), $data['id']);
     }
@@ -114,7 +114,7 @@ class TransportStartTest extends WebTestCase
 
     public function testCreateFail(): void
     {
-        $times = [0,1020];
+        $times = [0, 1020];
         $this->client->request('POST', '/api/transports/starts/', content: json_encode([
             'times' => $times
         ]));

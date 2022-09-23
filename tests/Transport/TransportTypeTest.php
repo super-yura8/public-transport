@@ -22,7 +22,7 @@ class TransportTypeTest extends WebTestCase
         $loader = new NativeLoader();
         $this->client = self::createClient();
         $kernel = static::bootKernel();
-        $objectSet = $loader->loadFile($kernel->getProjectDir().'/fixtures/data.yaml');
+        $objectSet = $loader->loadFile($kernel->getProjectDir() . '/fixtures/data.yaml');
         $this->em = $kernel->getContainer()
             ->get('doctrine')
             ->getManager();

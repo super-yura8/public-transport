@@ -4,8 +4,14 @@ namespace App\Tests\Transport;
 
 use App\Entity\Transport;
 use App\Entity\TransportType;
+use App\Entity\User;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManager;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
+use JMS\Serializer\Naming\IdenticalPropertyNamingStrategy;
+use JMS\Serializer\Naming\SerializedNameAnnotationStrategy;
+use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializerBuilder;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Nelmio\Alice\Loader\NativeLoader;
@@ -22,7 +28,7 @@ class TransportTest extends WebTestCase
         $loader = new NativeLoader();
         $this->client = self::createClient();
         $kernel = static::bootKernel();
-        $objectSet = $loader->loadFile($kernel->getProjectDir().'/fixtures/data.yaml');
+        $objectSet = $loader->loadFile($kernel->getProjectDir() . '/fixtures/data.yaml');
         $this->em = $kernel->getContainer()
             ->get('doctrine')
             ->getManager();
@@ -31,7 +37,7 @@ class TransportTest extends WebTestCase
     }
 
 
-    public function testCreate() : void
+    public function testCreate(): void
     {
         $typeId = $this->em->getRepository(TransportType::class)->findOneBy([])->getId();
         $this->client->request('POST', '/api/transports/', content: json_encode([
@@ -48,7 +54,7 @@ class TransportTest extends WebTestCase
     }
 
 
-    public function testGetAll() : void
+    public function testGetAll(): void
     {
         $this->client->request('GET', '/api/transports/');
         $response = $this->client->getResponse();
@@ -61,7 +67,7 @@ class TransportTest extends WebTestCase
         $this->assertArrayHasKey('type', $data[0]);
     }
 
-    public function testGet() : void
+    public function testGet(): void
     {
         $transportId = $this->em->getRepository(Transport::class)->findOneBy(['number' => 1001])->getId();
         $this->client->request('GET', '/api/transports/' . $transportId);
@@ -75,7 +81,7 @@ class TransportTest extends WebTestCase
         $this->assertSame(1001, $data['number']);
     }
 
-    public function testPatch() : void
+    public function testPatch(): void
     {
         $transportId = $this->em->getRepository(Transport::class)->findOneBy(['number' => 1001])->getId();
         $this->client->request('PATCH', '/api/transports/' . $transportId, content: json_encode([
@@ -91,7 +97,7 @@ class TransportTest extends WebTestCase
         $this->assertSame(1002, $data['number']);
     }
 
-    public function testPut() : void
+    public function testPut(): void
     {
         $transport = $this->em->getRepository(Transport::class)->findOneBy(['number' => 1002]);
         $this->client->request('PUT', '/api/transports/' . $transport->getId(), content: json_encode([
@@ -108,14 +114,14 @@ class TransportTest extends WebTestCase
         $this->assertSame(1001, $data['number']);
     }
 
-    public function testDelete() : void
+    public function testDelete(): void
     {
         $transport = $this->em->getRepository(Transport::class)->findOneBy(['number' => 1001]);
         $this->client->request('DELETE', '/api/transports/' . $transport->getId());
         $this->assertResponseIsSuccessful();
     }
 
-    public function testCreateFail() : void
+    public function testCreateFail(): void
     {
         $typeId = $this->em->getRepository(TransportType::class)->findOneBy([])->getId();
         $this->client->request('POST', '/api/transports/', content: json_encode([
@@ -125,13 +131,13 @@ class TransportTest extends WebTestCase
         $this->assertResponseStatusCodeSame(409);
     }
 
-    public function testGetFail() : void
+    public function testGetFail(): void
     {
         $this->client->request('GET', '/api/transports/0');
         $this->assertResponseStatusCodeSame(404);
     }
 
-    public function testPatchFail() : void
+    public function testPatchFail(): void
     {
         $transportId = $this->em->getRepository(Transport::class)->findOneBy([])->getId();
         $this->client->request('PATCH', '/api/transports/' . $transportId, content: json_encode([
@@ -140,7 +146,7 @@ class TransportTest extends WebTestCase
         $this->assertResponseStatusCodeSame(409);
     }
 
-    public function testPutFail409() : void
+    public function testPutFail409(): void
     {
         $transport = $this->em->getRepository(Transport::class)->findOneBy([]);
         $this->client->request('PUT', '/api/transports/' . $transport->getId(), content: json_encode([
@@ -150,7 +156,7 @@ class TransportTest extends WebTestCase
         $this->assertResponseStatusCodeSame(409);
     }
 
-    public function testPutFail404() : void
+    public function testPutFail404(): void
     {
         $transport = $this->em->getRepository(Transport::class)->findOneBy([]);
         $this->client->request('PUT', '/api/transports/' . $transport->getId(), content: json_encode([
@@ -159,9 +165,57 @@ class TransportTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
     }
 
-    public function testDeleteFail() : void
+    public function testDeleteFail(): void
     {
         $this->client->request('DELETE', '/api/transports/0');
         $this->assertResponseStatusCodeSame(404);
+    }
+
+    public function testGetFavorites(): void
+    {
+        $this->client->request('GET', '/api/transports/favorites');
+        $this->assertResponseIsSuccessful();
+        $response = $this->client->getResponse();
+        $data = json_decode($response->getContent(), true);
+        $favorites = $this->em->getRepository(User::class)->findOneBy(['email' => 'admin@tt.com'])->getTransports();
+        $serializer = SerializerBuilder::create()->setPropertyNamingStrategy(
+            new SerializedNameAnnotationStrategy(
+                new IdenticalPropertyNamingStrategy()
+            ))->build();
+        $favorites = $serializer
+            ->toArray(
+                $favorites,
+                context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC'])
+            );
+        $this->assertEquals($data, $favorites);
+    }
+
+    public function testAddFavorite(): void
+    {
+        $transports = $this->em->getRepository(User::class)->findOneBy(['email' => 'admin@tt.com'])->getTransports();
+        $transports = $transports->map(function ($obj) {
+            return $obj->getId();
+        })->getValues();
+        $criteria = new Criteria();
+        $criteria->where(Criteria::expr()->notIn('id', $transports));
+        $transport = $this->em->getRepository(Transport::class)->matching($criteria)->first();
+
+        $this->client->request('POST', '/api/transports/favorites', content: json_encode([
+            'transport' => $transport->getId()
+        ]));
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseStatusCodeSame(202);
+    }
+
+    public function testRemoveFavorite(): void
+    {
+        $transport = $this->em->getRepository(User::class)
+            ->findOneBy(['email' => 'admin@tt.com'])
+            ->getTransports()
+            ->first();
+        $this->client->request('DELETE', '/api/transports/favorites/' . $transport->getId());
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseStatusCodeSame(202);
+
     }
 }

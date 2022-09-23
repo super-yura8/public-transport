@@ -4,6 +4,7 @@ App\Entity\User:
     password: '\$2a\$13\$VNNpe55rhGCObCs5JhCXzuImVawSQaY5SrXP96ww/8mq6YuhmrSwS'
     api_token: '11111111111111111111111111111111111111111111111111111111111111111111111111111111111111'
     roles: ['USER_ADMIN']
+    transports: '5x @transport<numberBetween(1, 10)>'
   user_2:
     email: 'user@tt.com'
     password: '\$2a\$13\$VNNpe55rhGCObCs5JhCXzuImVawSQaY5SrXP96ww/8mq6YuhmrSwS'
