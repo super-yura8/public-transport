@@ -101,9 +101,15 @@ class TransportStartTest extends WebTestCase
     {
         $transportId = $this->em->getRepository(Transport::class)->findOneBy(['number' => 1111])->getId();
         $start = $this->em->getRepository(TransportStart::class)->findOneBy(['transport' => $transportId]);
-        $this->client->request('GET', '/api/transports/starts/' . $start->getId());
+        $this->client->request('DELETE', '/api/transports/starts/' . $start->getId());
         $this->assertResponseIsSuccessful();
 
+    }
+
+    public function testDeleteNotFound(): void
+    {
+        $this->client->request('DELETE', '/api/transports/starts/0');
+        $this->assertResponseStatusCodeSame(404);
     }
 
     public function testGetFail(): void
@@ -122,13 +128,28 @@ class TransportStartTest extends WebTestCase
     }
 
 
-    public function testPatchFail(): void
+    public function testPatchFail409(): void
     {
         $start = $this->em->getRepository(TransportStart::class)->findOneBy([]);
         $this->client->request('PATCH', '/api/transports/starts/' . $start->getId(), content: json_encode([
             'times' => 123
         ]));
         $this->assertResponseStatusCodeSame(409);
+    }
+
+    public function testPutFail400(): void
+    {
+        $start = $this->em->getRepository(TransportStart::class)->findOneBy([]);
+        $this->client->request('PUT', '/api/transports/starts/' . $start->getId(), content: json_encode([
+            'times' => 123
+        ]));
+        $this->assertResponseStatusCodeSame(400);
+    }
+
+    public function testUpdateNotFound(): void
+    {
+        $this->client->request('PATCH', '/api/transports/starts/0');
+        $this->assertResponseStatusCodeSame(404);
     }
 
     public function testDeleteFail(): void

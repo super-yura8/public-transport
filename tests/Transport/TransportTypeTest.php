@@ -83,6 +83,21 @@ class TransportTypeTest extends WebTestCase
         $this->assertSame($type->getId(), $data['id']);
     }
 
+    public function testUpdateNotFound(): void
+    {
+        $this->client->request('PATCH', '/api/transports/types/0');
+        $this->assertResponseStatusCodeSame(404);
+    }
+
+    public function testUpdateNotValid(): void
+    {
+        $type = $this->em->getRepository(TransportType::class)->findOneBy([]);
+        $this->client->request('PATCH', '/api/transports/types/' . $type->getId(), content: json_encode([
+            'name' => ['test']
+        ]));
+        $this->assertResponseStatusCodeSame(409);
+    }
+
     public function testDelete(): void
     {
         $type = $this->em->getRepository(TransportType::class)->findOneBy(['name' => 'test1']);

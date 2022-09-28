@@ -68,7 +68,6 @@ class TransportStartController extends AbstractController
         $this->denyAccessUnlessGranted('CREATE');
         $data = json_decode($request->getContent(), true);
         $start = new TransportStart();
-//        dd($data);
         $form = $this->createForm(TransportStartType::class, $start);
 
         try {

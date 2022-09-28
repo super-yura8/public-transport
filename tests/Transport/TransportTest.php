@@ -137,6 +137,12 @@ class TransportTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
     }
 
+    public function testUpdateNotFound()
+    {
+        $this->client->request('PATCH', '/api/transports/0');
+        $this->assertResponseStatusCodeSame(404);
+    }
+
     public function testPatchFail(): void
     {
         $transportId = $this->em->getRepository(Transport::class)->findOneBy([])->getId();
@@ -156,7 +162,7 @@ class TransportTest extends WebTestCase
         $this->assertResponseStatusCodeSame(409);
     }
 
-    public function testPutFail404(): void
+    public function testPutFail400(): void
     {
         $transport = $this->em->getRepository(Transport::class)->findOneBy([]);
         $this->client->request('PUT', '/api/transports/' . $transport->getId(), content: json_encode([
@@ -216,6 +222,21 @@ class TransportTest extends WebTestCase
         $this->client->request('DELETE', '/api/transports/favorites/' . $transport->getId());
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(202);
+
+    }
+
+    public function testAddFavoriteNotFound(): void
+    {
+        $this->client->request('POST', '/api/transports/favorites', content: json_encode([
+            'transport' => 0
+        ]));
+        $this->assertResponseStatusCodeSame(404);
+    }
+
+    public function testRemoveFavoriteNotFound(): void
+    {
+        $this->client->request('DELETE', '/api/transports/favorites/0');
+        $this->assertResponseStatusCodeSame(404);
 
     }
 }
