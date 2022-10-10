@@ -98,7 +98,7 @@ class TransportStopController extends AbstractController
         } else {
             return $this->json([
                 'message' => $formsErrorManager->getErrorsFromForm($form)
-            ], Response::HTTP_CONFLICT);
+            ], Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -142,7 +142,7 @@ class TransportStopController extends AbstractController
             } else {
                 return $this->json([
                     'message' => $formsErrorManager->getErrorsFromForm($form)
-                ], Response::HTTP_CONFLICT);
+                ], Response::HTTP_BAD_REQUEST);
             }
         }
         return $this->json(['message' => 'The transport does not exist'], Response::HTTP_NOT_FOUND);

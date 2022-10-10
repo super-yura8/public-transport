@@ -128,7 +128,7 @@ class TransportTest extends WebTestCase
             'number' => null,
             'type' => $typeId
         ]));
-        $this->assertResponseStatusCodeSame(409);
+        $this->assertResponseStatusCodeSame(400);
     }
 
     public function testGetFail(): void
@@ -149,17 +149,17 @@ class TransportTest extends WebTestCase
         $this->client->request('PATCH', '/api/transports/' . $transportId, content: json_encode([
             'number' => 'fail'
         ]));
-        $this->assertResponseStatusCodeSame(409);
+        $this->assertResponseStatusCodeSame(400);
     }
 
-    public function testPutFail409(): void
+    public function testPutFailInvalid(): void
     {
         $transport = $this->em->getRepository(Transport::class)->findOneBy([]);
         $this->client->request('PUT', '/api/transports/' . $transport->getId(), content: json_encode([
             'number' => 'fail',
             'type' => $transport->getType()->getId()
         ]));
-        $this->assertResponseStatusCodeSame(409);
+        $this->assertResponseStatusCodeSame(400);
     }
 
     public function testPutFail400(): void

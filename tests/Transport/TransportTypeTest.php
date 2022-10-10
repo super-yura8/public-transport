@@ -95,7 +95,7 @@ class TransportTypeTest extends WebTestCase
         $this->client->request('PATCH', '/api/transports/types/' . $type->getId(), content: json_encode([
             'name' => ['test']
         ]));
-        $this->assertResponseStatusCodeSame(409);
+        $this->assertResponseStatusCodeSame(400);
     }
 
     public function testDelete(): void

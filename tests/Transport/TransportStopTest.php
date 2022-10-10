@@ -98,7 +98,7 @@ class TransportStopTest extends WebTestCase
         $this->client->request('POST', '/api/transports/stops/', content: json_encode([
 
         ]));
-        $this->assertResponseStatusCodeSame(409);
+        $this->assertResponseStatusCodeSame(400);
     }
 
     public function testGetFail(): void
@@ -121,7 +121,7 @@ class TransportStopTest extends WebTestCase
         $this->client->request('PUT', '/api/transports/stops/' . $stop->getId(), content: json_encode([
             'address' => ['test']
         ]));
-        $this->assertResponseStatusCodeSame(409);
+        $this->assertResponseStatusCodeSame(400);
 
     }
 

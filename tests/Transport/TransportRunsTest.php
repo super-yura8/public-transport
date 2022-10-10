@@ -132,7 +132,7 @@ class TransportRunsTest extends WebTestCase
             'transport' => $transportId,
             'arrivalTime' => 1111
         ]));
-        $this->assertResponseStatusCodeSame(409);
+        $this->assertResponseStatusCodeSame(400);
     }
 
 
@@ -143,7 +143,7 @@ class TransportRunsTest extends WebTestCase
         $this->client->request('PATCH', '/api/transports/runs/' . $run->getId(), content: json_encode([
             'arrivalTime' => 'test'
         ]));
-        $this->assertResponseStatusCodeSame(409);
+        $this->assertResponseStatusCodeSame(400);
     }
 
     public function testPutFail400(): void

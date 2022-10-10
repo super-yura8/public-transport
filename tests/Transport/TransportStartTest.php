@@ -124,17 +124,17 @@ class TransportStartTest extends WebTestCase
         $this->client->request('POST', '/api/transports/starts/', content: json_encode([
             'times' => $times
         ]));
-        $this->assertResponseStatusCodeSame(409);
+        $this->assertResponseStatusCodeSame(400);
     }
 
 
-    public function testPatchFail409(): void
+    public function testPatchFailInvalid(): void
     {
         $start = $this->em->getRepository(TransportStart::class)->findOneBy([]);
         $this->client->request('PATCH', '/api/transports/starts/' . $start->getId(), content: json_encode([
             'times' => 123
         ]));
-        $this->assertResponseStatusCodeSame(409);
+        $this->assertResponseStatusCodeSame(400);
     }
 
     public function testPutFail400(): void
