@@ -16,8 +16,7 @@ class RegistrationType extends AbstractType
     {
         $regexConstraintsOptions = [
             'pattern' => '/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,30}$/',
-            'message' => 'Your password must consist from 8 to
-             30 characters and has at least one letter and one number'
+            'message' => 'Your password must consist from 8 to 30 characters and has at least one letter and one number'
         ];
 
         $builder
