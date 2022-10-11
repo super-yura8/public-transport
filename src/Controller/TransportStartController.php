@@ -68,7 +68,6 @@ class TransportStartController extends AbstractController
         $this->denyAccessUnlessGranted('CREATE');
         $data = json_decode($request->getContent(), true);
         $start = new TransportStart();
-//        dd($data);
         $form = $this->createForm(TransportStartType::class, $start);
 
         try {
@@ -91,7 +90,7 @@ class TransportStartController extends AbstractController
         } else {
             return $this->json([
                 'message' => $formsErrorManager->getErrorsFromForm($form)
-            ], Response::HTTP_CONFLICT);
+            ], Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -135,7 +134,7 @@ class TransportStartController extends AbstractController
             } else {
                 return $this->json([
                     'message' => $formsErrorManager->getErrorsFromForm($form)
-                ], Response::HTTP_CONFLICT);
+                ], Response::HTTP_BAD_REQUEST);
             }
         }
         return $this->json(['message' => 'The start does not exist'], Response::HTTP_NOT_FOUND);

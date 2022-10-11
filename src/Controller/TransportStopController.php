@@ -98,7 +98,7 @@ class TransportStopController extends AbstractController
         } else {
             return $this->json([
                 'message' => $formsErrorManager->getErrorsFromForm($form)
-            ], Response::HTTP_CONFLICT);
+            ], Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -142,7 +142,7 @@ class TransportStopController extends AbstractController
             } else {
                 return $this->json([
                     'message' => $formsErrorManager->getErrorsFromForm($form)
-                ], Response::HTTP_CONFLICT);
+                ], Response::HTTP_BAD_REQUEST);
             }
         }
         return $this->json(['message' => 'The transport does not exist'], Response::HTTP_NOT_FOUND);
@@ -158,6 +158,7 @@ class TransportStopController extends AbstractController
                     $transportRepository->findByStop($id),
                     context: SerializationContext::create()->setGroups(['TRANSPORT_PUBLIC'])
                 );
+
             return $this->json($transports);
         }
         return $this->json(['message' => 'The stop does not exist'], Response::HTTP_NOT_FOUND);
@@ -200,9 +201,9 @@ class TransportStopController extends AbstractController
         if (!is_null($stop)) {
             $closest = [];
             if (!is_null($time = $request->query->get('timestamp'))) {
-                $minutes = intval(date('H', $time)) * 60 + intval(date('m', $time));
+                $minutes = intval(date('H', $time)) * 60 + intval(date('i', $time));
             } else {
-                $minutes = intval(date('H')) * 60 + intval(date('m'));
+                $minutes = intval(date('H')) * 60 + intval(date('i'));
             }
             foreach ($stop->getTransportRuns() as $run) {
                 $arrivalTime = $run->getArrivalTime();
