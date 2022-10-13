@@ -1,13 +1,13 @@
 App\Entity\User:
   user_1:
     email: 'admin@tt.com'
-    password: '\$2a\$13\$VNNpe55rhGCObCs5JhCXzuImVawSQaY5SrXP96ww/8mq6YuhmrSwS'
+    password: '\$2a\$12\$4Dnxc6bM2W7CgXUN2PubxeR/mdOufuJtK2CQdLrO8ZfkXBVTJtgR.'
     api_token: '11111111111111111111111111111111111111111111111111111111111111111111111111111111111111'
     roles: ['USER_ADMIN']
     transports: '5x @transport<numberBetween(1, 10)>'
   user_2:
     email: 'user@tt.com'
-    password: '\$2a\$13\$VNNpe55rhGCObCs5JhCXzuImVawSQaY5SrXP96ww/8mq6YuhmrSwS'
+    password: '\$2a\$12\$4Dnxc6bM2W7CgXUN2PubxeR/mdOufuJtK2CQdLrO8ZfkXBVTJtgR.'
     api_token: '22222222222222222222222222222222222222222222222222222222222222222222222222222222222222'
 
 App\Entity\TransportType:
