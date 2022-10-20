@@ -1,0 +1,40 @@
+App\Entity\User:
+  user_1:
+    email: 'admin@tt.com'
+    password: '\$2a\$12\$4Dnxc6bM2W7CgXUN2PubxeR/mdOufuJtK2CQdLrO8ZfkXBVTJtgR.'
+    api_token: '11111111111111111111111111111111111111111111111111111111111111111111111111111111111111'
+    roles: ['USER_ADMIN']
+    transports: '5x @transport<numberBetween(1, 10)>'
+  user_2:
+    email: 'user@tt.com'
+    password: '\$2a\$12\$4Dnxc6bM2W7CgXUN2PubxeR/mdOufuJtK2CQdLrO8ZfkXBVTJtgR.'
+    api_token: '22222222222222222222222222222222222222222222222222222222222222222222222222222222222222'
+
+App\Entity\TransportType:
+  transportType_1:
+    name: 'bus'
+  transportType_2:
+    name: 'electric'
+
+App\Entity\Transport:
+  transport{1..10}:
+    number (unique): '<numberBetween(1, 1000)>'
+    type: '@transportType*'
+  transport11:
+    number (unique): '1111'
+    type: '@transportType*'
+
+App\Entity\TransportStop:
+  transportStop{1..100}:
+    address (unique): '<text(30)>'
+
+App\Entity\TransportRun:
+  transportRun{1..100}:
+    transportStop: '@transportStop*'
+    transport: '@transport<numberBetween(1, 10)>'
+    arrivalTime: '<numberBetween(1, 100)>'
+
+App\Entity\TransportStart:
+  transportStart{1..10}:
+    transport: '@transport<current()>'
+    times: '10x <numberBetween(0, 1440)>'
